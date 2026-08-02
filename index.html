@@ -50,7 +50,7 @@
             <h1 class="text-5xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-blue-200 to-blue-500 text-glow pb-2">
                 Delta Lite
             </h1>
-            <p class="text-slate-500 text-sm mt-2 font-medium tracking-wider uppercase">Void Secure Portal</p>
+            <p class="text-slate-500 text-sm mt-2 font-medium tracking-wider uppercase">Tiktok: @xrobproject</p>
         </header>
 
         <!-- 1. SECTION: AUTH KEY LOGIN -->
@@ -114,34 +114,27 @@
 
     <!-- FOOTER -->
     <footer class="text-center py-8 text-xs text-slate-700 tracking-widest uppercase font-medium border-t border-slate-900 mt-10">
-        &copy; 2026 Void Systems. All rights reserved.
+        &copy; 2026 Delta Lite. All rights reserved.
     </footer>
 
     <!-- LOGIKA JAVASCRIPT -->
     <script>
-        // Simulasi data (Ganti dengan fetch('data.json') jika file sudah ada)
-        let globalData = { 
-            auth_key: "delta2026", 
-            downloads: { 
-                "64bit": [
-                    { title: "Delta Lite v3.2.1 - Stable", link: "#" },
-                    { title: "Roblox Mod Client v64.5", link: "#" },
-                    { title: "Inject Engine (Vulcan)", link: "#" }
-                ], 
-                "32bit": [
-                    { title: "Delta Lite Legacy v2.9", link: "#" },
-                    { title: "Roblox Mod Client v32.1", link: "#" }
-                ] 
-            } 
-        };
+        let globalData = { auth_key: "delta2026", downloads: { "64bit": [], "32bit": [] } };
 
-        // Simulasi fetch data (hapus ini jika menggunakan file json sungguhan)
-        async function fetchAppData() { return globalData; }
+        async function fetchAppData() {
+            try {
+                const response = await fetch('data.json?t=' + new Date().getTime());
+                if (response.ok) {
+                    globalData = await response.json();
+                }
+            } catch (error) {
+                console.error("Gagal memuat data.json:", error);
+            }
+        }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // Gunakan fungsi ini untuk mengambil data sungguhan
-            // globalData = await fetch('data.json').then(res => res.json());
-            
+            await fetchAppData();
+
             const sessionDevice = sessionStorage.getItem('delta_session_active');
             if (sessionDevice === 'true') {
                 showDashboard();
@@ -179,13 +172,12 @@
             const cont64 = document.getElementById('content-64bit');
             const cont32 = document.getElementById('content-32bit');
 
-            const activeClass = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-blue-400 bg-blue-500/5 border-b-2 border-blue-500 shadow-[0_-4px_10px_-5px_rgba(96,165,250,0.3)]";
+            const activeClass64 = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-blue-400 bg-blue-500/5 border-b-2 border-blue-500 shadow-[0_-4px_10px_-5px_rgba(96,165,250,0.3)]";
+            const activeClass32 = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-indigo-400 bg-indigo-500/5 border-b-2 border-indigo-500 shadow-[0_-4px_10px_-5px_rgba(129,140,248,0.3)]";
             const inactiveClass = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-slate-500 hover:text-slate-300 border-b-2 border-transparent hover:border-slate-700";
 
-            const activeClass32 = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-indigo-400 bg-indigo-500/5 border-b-2 border-indigo-500 shadow-[0_-4px_10px_-5px_rgba(129,140,248,0.3)]";
-
             if (type === '64bit') {
-                btn64.className = activeClass;
+                btn64.className = activeClass64;
                 btn32.className = inactiveClass;
                 cont64.classList.remove('hidden');
                 cont32.classList.add('hidden');
@@ -199,30 +191,43 @@
 
         function renderDownloadLists() {
             const cont64 = document.getElementById('content-64bit');
-            cont64.innerHTML = globalData.downloads['64bit'].map(item => `
-                <div class="group bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-blue-800 transition-all duration-300 hover:shadow-lg hover:shadow-blue-950/30 hover:translate-x-1">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-blue-950 border border-blue-800 text-blue-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-cloud-arrow-down"></i>
+            cont64.innerHTML = globalData.downloads['64bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 64-Bit.</p>' : 
+                globalData.downloads['64bit'].map(item => `
+                    <div class="group bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-blue-800 transition-all duration-300 hover:shadow-lg hover:shadow-blue-950/30 hover:translate-x-1">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-blue-950 border border-blue-800 text-blue-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i class="fa-solid fa-cloud-arrow-down"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-200 group-hover:text-white">${item.title}</h4>
+                                <span class="text-[11px] text-blue-500 font-medium tracking-tight opacity-80 group-hover:opacity-100">FILE PKG :: 64-BIT</span>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-sm font-semibold text-slate-200 group-hover:text-white">${item.title}</h4>
-                            <span class="text-[11px] text-blue-500 font-medium tracking-tight opacity-80 group-hover:opacity-100">FILE PKG :: 64-BIT</span>
-                        </div>
+                        <a href="${item.link}" target="_blank" class="bg-slate-800 group-hover:bg-blue-700 text-blue-300 group-hover:text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all duration-300 border border-slate-700 group-hover:border-blue-500">
+                            Unduh
+                        </a>
                     </div>
-                    <a href="${item.link}" target="_blank" class="bg-slate-800 group-hover:bg-blue-700 text-blue-300 group-hover:text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all duration-300 border border-slate-700 group-hover:border-blue-500">
-                        Unduh
-                    </a>
-                </div>
-            `).join('');
+                `).join('');
 
             const cont32 = document.getElementById('content-32bit');
-            cont32.innerHTML = globalData.downloads['32bit'].map(item => `
-                <div class="group bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-indigo-800 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-950/30 hover:translate-x-1">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-indigo-950 border border-indigo-800 text-indigo-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-box-archive"></i>
+            cont32.innerHTML = globalData.downloads['32bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 32-Bit.</p>' : 
+                globalData.downloads['32bit'].map(item => `
+                    <div class="group bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-indigo-800 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-950/30 hover:translate-x-1">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-indigo-950 border border-indigo-800 text-indigo-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                                <i class="fa-solid fa-box-archive"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-slate-200 group-hover:text-white">${item.title}</h4>
+                                <span class="text-[11px] text-indigo-500 font-medium tracking-tight opacity-80 group-hover:opacity-100">FILE PKG :: 32-BIT</span>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-sm font-semibold text-slate-200 group-hover:text-white">${item.title}</h4>
-                            <span class="text-[11px] text-indigo-500 font-medium tracking-tight opacity-80 group-hover:
+                        <a href="${item.link}" target="_blank" class="bg-slate-800 group-hover:bg-indigo-700 text-indigo-300 group-hover:text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all duration-300 border border-slate-700 group-hover:border-indigo-500">
+                            Unduh
+                        </a>
+                    </div>
+                `).join('');
+        }
+    </script>
+</body>
+</html>
