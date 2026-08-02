@@ -63,10 +63,10 @@
 
             <!-- Tab Navigasi Folder (64Bit & 32Bit) -->
             <div class="flex gap-2 border-b border-slate-800 pb-3">
-                <button onclick="switchTab('64bit')" id="tab-64bit" class="flex-py-2 px-4 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2">
+                <button onclick="switchTab('64bit')" id="tab-64bit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2">
                     <i class="fa-solid fa-microchip"></i> Folder 64-Bit
                 </button>
-                <button onclick="switchTab('32bit')" id="tab-32bit" class="flex-py-2 px-4 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2">
+                <button onclick="switchTab('32bit')" id="tab-32bit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2">
                     <i class="fa-solid fa-cpu"></i> Folder 32-Bit
                 </button>
             </div>
@@ -141,7 +141,6 @@
 
     <!-- LOGIKA JAVASCRIPT -->
     <script>
-        // Default Data Penyimpanan (LocalStorage)
         const DEFAULT_KEY = "delta2026";
         const DEFAULT_DATA = {
             "64bit": [
@@ -153,11 +152,14 @@
             ]
         };
 
-        // Inisialisasi Storage jika belum ada
-        if (!localStorage.getItem('delta_auth_key')) localStorage.setItem('delta_auth_key', DEFAULT_KEY);
-        if (!localStorage.getItem('delta_downloads')) localStorage.setItem('delta_downloads', JSON.stringify(DEFAULT_DATA));
+        // Inisialisasi Storage
+        if (!localStorage.getItem('delta_auth_key')) {
+            localStorage.setItem('delta_auth_key', DEFAULT_KEY);
+        }
+        if (!localStorage.getItem('delta_downloads')) {
+            localStorage.setItem('delta_downloads', JSON.stringify(DEFAULT_DATA));
+        }
 
-        // Cek URL Parameter Admin (?sandirobux)
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('sandirobux')) {
@@ -167,21 +169,18 @@
                 return;
             }
 
-            // Cek Sesi Perangkat
             const sessionDevice = sessionStorage.getItem('delta_session_active');
             if (sessionDevice === 'true') {
                 showDashboard();
             }
         });
 
-        // Handler Auth Key Login
         function handleAuth(e) {
             e.preventDefault();
             const inputKey = document.getElementById('auth-key-input').value.trim();
             const savedKey = localStorage.getItem('delta_auth_key');
 
             if (inputKey === savedKey) {
-                // Lock sesi ke device ini (menggunakan sessionStorage agar hanya berlaku pada tab/sesi browser ini)
                 sessionStorage.setItem('delta_session_active', 'true');
                 showDashboard();
             } else {
@@ -191,14 +190,12 @@
             }
         }
 
-        // Tampilkan Dashboard Download
         function showDashboard() {
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
             renderDownloadLists();
         }
 
-        // Logout / Hapus Sesi Device
         function handleLogout() {
             sessionStorage.removeItem('delta_session_active');
             document.getElementById('dashboard-section').classList.add('hidden');
@@ -206,7 +203,6 @@
             document.getElementById('auth-key-input').value = '';
         }
 
-        // Switch Tab Folder (64bit / 32bit)
         function switchTab(type) {
             const btn64 = document.getElementById('tab-64bit');
             const btn32 = document.getElementById('tab-32bit');
@@ -214,23 +210,21 @@
             const cont32 = document.getElementById('content-32bit');
 
             if (type === '64bit') {
-                btn64.className = "flex-py-2 px-4 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2";
-                btn32.className = "flex-py-2 px-4 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2";
+                btn64.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2";
+                btn32.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2";
                 cont64.classList.remove('hidden');
                 cont32.classList.add('hidden');
             } else {
-                btn32.className = "flex-py-2 px-4 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2";
-                btn64.className = "flex-py-2 px-4 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2";
+                btn32.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2";
+                btn64.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2";
                 cont32.classList.remove('hidden');
                 cont64.classList.add('hidden');
             }
         }
 
-        // Render List Download di Halaman Utama
         function renderDownloadLists() {
             const data = JSON.parse(localStorage.getItem('delta_downloads'));
             
-            // Render 64bit
             const cont64 = document.getElementById('content-64bit');
             cont64.innerHTML = data['64bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 64-Bit.</p>' : 
                 data['64bit'].map(item => `
@@ -246,7 +240,6 @@
                     </div>
                 `).join('');
 
-            // Render 32bit
             const cont32 = document.getElementById('content-32bit');
             cont32.innerHTML = data['32bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 32-Bit.</p>' : 
                 data['32bit'].map(item => `
@@ -263,12 +256,10 @@
                 `).join('');
         }
 
-        // Tutup Panel Admin dan kembali normal
         function closeAdmin() {
             window.location.href = window.location.pathname;
         }
 
-        // Simpan Auth Key Baru dari Admin
         function saveNewKey() {
             const newKey = document.getElementById('admin-new-key').value.trim();
             if (!newKey) return alert('Key tidak boleh kosong!');
@@ -277,7 +268,6 @@
             document.getElementById('admin-new-key').value = '';
         }
 
-        // Tambah Item Download dari Admin
         function addDownloadItem() {
             const title = document.getElementById('admin-title').value.trim();
             const link = document.getElementById('admin-link').value.trim();
@@ -295,7 +285,6 @@
             alert('Link berhasil ditambahkan!');
         }
 
-        // Hapus Item Download dari Admin
         function deleteItem(arch, index) {
             const data = JSON.parse(localStorage.getItem('delta_downloads'));
             data[arch].splice(index, 1);
@@ -303,7 +292,6 @@
             renderAdminList();
         }
 
-        // Render List Manajemen Admin
         function renderAdminList() {
             const data = JSON.parse(localStorage.getItem('delta_downloads'));
             const listEl = document.getElementById('admin-item-list');
