@@ -3,107 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delta Lite - Download Manager</title>
+    <title>Delta Lite - Void Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Glow Utilities & Animations */
+        .text-glow {
+            filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.6));
+        }
+        
+        .border-glow-blue {
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+        }
+        
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+            border-color: #60a5fa;
+        }
+
+        /* Void Background Radial */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 70%, #020617 100%);
+            z-index: -1;
+        }
+
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
+<body class="text-slate-300 min-h-screen flex flex-col justify-between font-sans antialiased selection:bg-blue-500/30 selection:text-blue-200">
 
     <!-- Container Utama -->
-    <main class="container mx-auto px-4 py-8 max-w-2xl flex-grow">
+    <main class="container mx-auto px-4 py-10 max-w-2xl flex-grow">
         
         <!-- HEADER -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-                Delta Lite Portal
+        <header class="text-center mb-12 mt-6">
+            <h1 class="text-5xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-blue-200 to-blue-500 text-glow pb-2">
+                Delta Lite
             </h1>
-            <p class="text-slate-400 text-sm mt-1">Secure Device Session & Download Center</p>
+            <p class="text-slate-500 text-sm mt-2 font-medium tracking-wider uppercase">Void Secure Portal</p>
         </header>
 
         <!-- 1. SECTION: AUTH KEY LOGIN -->
-        <section id="auth-section" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
-                    <i class="fa-solid fa-key text-xl"></i>
+        <section id="auth-section" class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-3xl p-8 shadow-2xl border-glow-blue">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="p-4 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20 shadow-inner">
+                    <i class="fa-solid fa-fingerprint text-2xl"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg">Autentikasi Key</h2>
-                    <p class="text-xs text-slate-400">Masukkan key akses untuk membuka sesi perangkat ini.</p>
+                    <h2 class="font-bold text-2xl text-slate-100">Autentikasi Sesi</h2>
+                    <p class="text-sm text-slate-400">Masukkan access key untuk menghubungkan perangkat.</p>
                 </div>
             </div>
-            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-                <div>
-                    <input type="text" id="auth-key-input" placeholder="Masukkan Auth Key..." required
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition">
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-6">
+                <div class="relative">
+                    <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-600"></i>
+                    <input type="password" id="auth-key-input" placeholder="••••••••" required
+                        class="w-full bg-slate-950 border border-slate-700 rounded-full pl-12 pr-4 py-4 text-slate-200 placeholder:text-slate-600 focus:outline-none transition duration-300 input-glow focus:border-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 font-semibold py-3 rounded-xl transition text-sm shadow-lg shadow-blue-600/20 cursor-pointer">
-                    Verifikasi Key
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-bold py-4 rounded-full transition-all duration-300 shadow-lg shadow-blue-900/50 active:scale-[0.98] cursor-pointer text-glow border border-blue-500/30">
+                    Sinkronisasi
                 </button>
-                <p id="auth-error" class="text-red-400 text-xs text-center hidden">Auth key salah atau tidak aktif!</p>
+                <p id="auth-error" class="text-red-400 text-xs text-center hidden font-medium bg-red-950/50 py-2 rounded-lg border border-red-800">Key tidak valid atau sesi berakhir.</p>
             </form>
         </section>
 
         <!-- 2. SECTION: MAIN DASHBOARD (DOWNLOAD LIST) -->
-        <section id="dashboard-section" class="hidden space-y-6">
+        <section id="dashboard-section" class="hidden space-y-8">
             <!-- Info Sesi & Logout -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                        <i class="fa-solid fa-shield-halved"></i>
+            <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-3xl p-5 flex items-center justify-between shadow-lg border-glow-blue">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-inner">
+                        <i class="fa-solid fa-satellite-dish text-xl"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-400">Status Sesi</p>
-                        <p class="text-sm font-semibold text-emerald-400">Terproteksi di Perangkat Ini</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider font-medium">Status Koneksi</p>
+                        <p class="text-base font-bold text-emerald-400 tracking-tight">Enkripsi Aktif - Terhubung</p>
                     </div>
                 </div>
-                <button onclick="handleLogout()" class="text-xs bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-300 px-3 py-2 rounded-lg transition cursor-pointer">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                <button onclick="handleLogout()" class="text-sm bg-slate-800 hover:bg-red-950/50 hover:text-red-300 text-slate-400 px-5 py-3 rounded-full transition duration-300 cursor-pointer font-medium border border-slate-700 hover:border-red-800 flex items-center gap-2">
+                    <i class="fa-solid fa-power-off"></i> Putus
                 </button>
             </div>
 
-            <!-- Tab Navigasi Folder (64Bit & 32Bit) -->
-            <div class="flex gap-2 border-b border-slate-800 pb-3">
-                <button onclick="switchTab('64bit')" id="tab-64bit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2">
-                    <i class="fa-solid fa-microchip"></i> Folder 64-Bit
+            <!-- Tab Navigasi -->
+            <div class="flex gap-3 border-b border-slate-800 pb-1 px-1">
+                <button onclick="switchTab('64bit')" id="tab-64bit" class="px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-blue-400 bg-blue-500/5 border-b-2 border-blue-500 shadow-[0_-4px_10px_-5px_rgba(96,165,250,0.3)]">
+                    <i class="fa-solid fa-microchip"></i> Arsitektur 64-Bit
                 </button>
-                <button onclick="switchTab('32bit')" id="tab-32bit" class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2">
-                    <i class="fa-solid fa-cpu"></i> Folder 32-Bit
+                <button onclick="switchTab('32bit')" id="tab-32bit" class="px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-slate-500 hover:text-slate-300 border-b-2 border-transparent hover:border-slate-700">
+                    <i class="fa-solid fa-cpu"></i> Arsitektur 32-Bit
                 </button>
             </div>
 
-            <!-- Konten List 64-Bit -->
-            <div id="content-64bit" class="space-y-3"></div>
-
-            <!-- Konten List 32-Bit -->
-            <div id="content-32bit" class="space-y-3 hidden"></div>
+            <!-- Konten List -->
+            <div id="content-64bit" class="space-y-4"></div>
+            <div id="content-32bit" class="space-y-4 hidden"></div>
         </section>
 
     </main>
 
     <!-- FOOTER -->
-    <footer class="text-center py-6 text-xs text-slate-600">
-        &copy; 2026 Delta Lite. Global Synchronized System.
+    <footer class="text-center py-8 text-xs text-slate-700 tracking-widest uppercase font-medium border-t border-slate-900 mt-10">
+        &copy; 2026 Void Systems. All rights reserved.
     </footer>
 
     <!-- LOGIKA JAVASCRIPT -->
     <script>
-        let globalData = { auth_key: "delta2026", downloads: { "64bit": [], "32bit": [] } };
+        // Simulasi data (Ganti dengan fetch('data.json') jika file sudah ada)
+        let globalData = { 
+            auth_key: "delta2026", 
+            downloads: { 
+                "64bit": [
+                    { title: "Delta Lite v3.2.1 - Stable", link: "#" },
+                    { title: "Roblox Mod Client v64.5", link: "#" },
+                    { title: "Inject Engine (Vulcan)", link: "#" }
+                ], 
+                "32bit": [
+                    { title: "Delta Lite Legacy v2.9", link: "#" },
+                    { title: "Roblox Mod Client v32.1", link: "#" }
+                ] 
+            } 
+        };
 
-        // Ambil data dari file data.json saat website dibuka
-        async function fetchAppData() {
-            try {
-                const response = await fetch('data.json?t=' + new Date().getTime()); // Mencegah cache browser
-                if (response.ok) {
-                    globalData = await response.json();
-                }
-            } catch (error) {
-                console.error("Gagal memuat data:", error);
-            }
-        }
+        // Simulasi fetch data (hapus ini jika menggunakan file json sungguhan)
+        async function fetchAppData() { return globalData; }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            await fetchAppData();
-
+            // Gunakan fungsi ini untuk mengambil data sungguhan
+            // globalData = await fetch('data.json').then(res => res.json());
+            
             const sessionDevice = sessionStorage.getItem('delta_session_active');
             if (sessionDevice === 'true') {
                 showDashboard();
@@ -120,7 +158,7 @@
             } else {
                 const errEl = document.getElementById('auth-error');
                 errEl.classList.remove('hidden');
-                setTimeout(() => errEl.classList.add('hidden'), 3000);
+                setTimeout(() => errEl.classList.add('hidden'), 4000);
             }
         }
 
@@ -132,8 +170,6 @@
 
         function handleLogout() {
             sessionStorage.removeItem('delta_session_active');
-            document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('auth-section').classList.remove('hidden');
             window.location.reload();
         }
 
@@ -143,14 +179,19 @@
             const cont64 = document.getElementById('content-64bit');
             const cont32 = document.getElementById('content-32bit');
 
+            const activeClass = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-blue-400 bg-blue-500/5 border-b-2 border-blue-500 shadow-[0_-4px_10px_-5px_rgba(96,165,250,0.3)]";
+            const inactiveClass = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-slate-500 hover:text-slate-300 border-b-2 border-transparent hover:border-slate-700";
+
+            const activeClass32 = "px-6 py-3 rounded-t-2xl text-sm font-semibold transition-all duration-300 cursor-pointer flex items-center gap-2.5 text-indigo-400 bg-indigo-500/5 border-b-2 border-indigo-500 shadow-[0_-4px_10px_-5px_rgba(129,140,248,0.3)]";
+
             if (type === '64bit') {
-                btn64.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2";
-                btn32.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2";
+                btn64.className = activeClass;
+                btn32.className = inactiveClass;
                 cont64.classList.remove('hidden');
                 cont32.classList.add('hidden');
             } else {
-                btn32.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-blue-600 text-white transition cursor-pointer flex items-center gap-2";
-                btn64.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-slate-400 hover:text-white transition cursor-pointer flex items-center gap-2";
+                btn32.className = activeClass32;
+                btn64.className = inactiveClass;
                 cont32.classList.remove('hidden');
                 cont64.classList.add('hidden');
             }
@@ -158,35 +199,30 @@
 
         function renderDownloadLists() {
             const cont64 = document.getElementById('content-64bit');
-            cont64.innerHTML = globalData.downloads['64bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 64-Bit.</p>' : 
-                globalData.downloads['64bit'].map(item => `
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-slate-700 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-file-arrow-down"></i></div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-slate-200">${item.title}</h4>
-                                <span class="text-[10px] text-blue-400 font-medium">Architecture: 64-Bit</span>
-                            </div>
+            cont64.innerHTML = globalData.downloads['64bit'].map(item => `
+                <div class="group bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-blue-800 transition-all duration-300 hover:shadow-lg hover:shadow-blue-950/30 hover:translate-x-1">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-blue-950 border border-blue-800 text-blue-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
                         </div>
-                        <a href="${item.link}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Download</a>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-200 group-hover:text-white">${item.title}</h4>
+                            <span class="text-[11px] text-blue-500 font-medium tracking-tight opacity-80 group-hover:opacity-100">FILE PKG :: 64-BIT</span>
+                        </div>
                     </div>
-                `).join('');
+                    <a href="${item.link}" target="_blank" class="bg-slate-800 group-hover:bg-blue-700 text-blue-300 group-hover:text-white text-xs font-bold px-6 py-2.5 rounded-full transition-all duration-300 border border-slate-700 group-hover:border-blue-500">
+                        Unduh
+                    </a>
+                </div>
+            `).join('');
 
             const cont32 = document.getElementById('content-32bit');
-            cont32.innerHTML = globalData.downloads['32bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 32-Bit.</p>' : 
-                globalData.downloads['32bit'].map(item => `
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-slate-700 transition">
-                        <div class="flex items-center gap-3">
-                            <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-lg"><i class="fa-solid fa-file-arrow-down"></i></div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-slate-200">${item.title}</h4>
-                                <span class="text-[10px] text-indigo-400 font-medium">Architecture: 32-Bit</span>
-                            </div>
+            cont32.innerHTML = globalData.downloads['32bit'].map(item => `
+                <div class="group bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5 flex items-center justify-between hover:border-indigo-800 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-950/30 hover:translate-x-1">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-indigo-950 border border-indigo-800 text-indigo-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                            <i class="fa-solid fa-box-archive"></i>
                         </div>
-                        <a href="${item.link}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Download</a>
-                    </div>
-                `).join('');
-        }
-    </script>
-</body>
-</html>
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-200 group-hover:text-white">${item.title}</h4>
+                            <span class="text-[11px] text-indigo-500 font-medium tracking-tight opacity-80 group-hover:
