@@ -78,59 +78,6 @@
             <div id="content-32bit" class="space-y-3 hidden"></div>
         </section>
 
-        <!-- 3. SECTION: ADMIN PANEL -->
-        <section id="admin-section" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
-                        <i class="fa-solid fa-sliders text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-lg">Admin Panel (Global Mode)</h2>
-                        <p class="text-xs text-slate-400">Kelola link download untuk semua perangkat</p>
-                    </div>
-                </div>
-                <button onclick="closeAdmin()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg transition cursor-pointer">
-                    Kembali ke Beranda
-                </button>
-            </div>
-
-            <!-- Info Panduan Admin -->
-            <div class="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-xs text-blue-300">
-                <i class="fa-solid fa-circle-info mr-1"></i> Perubahan data akan langsung tersimpan secara global dan otomatis terupdate di semua perangkat pengguna.
-            </div>
-
-            <!-- Pengaturan Auth Key -->
-            <div class="space-y-3">
-                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Ubah Auth Key Aktif</label>
-                <div class="flex gap-2">
-                    <input type="text" id="admin-new-key" placeholder="Key baru..." class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    <button onclick="updateGlobalKey()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Simpan Key</button>
-                </div>
-            </div>
-
-            <hr class="border-slate-800">
-
-            <!-- Tambah / Atur Link Download -->
-            <div class="space-y-4">
-                <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Tambah Link Download Baru</h3>
-                <div class="space-y-3">
-                    <input type="text" id="admin-title" placeholder="Nama File / Versi (Contoh: Delta Lite v2.1)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    <input type="text" id="admin-link" placeholder="URL Download (https://...)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    <select id="admin-arch" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 text-slate-300">
-                        <option value="64bit">Folder 64-Bit</option>
-                        <option value="32bit">Folder 32-Bit</option>
-                    </select>
-                    <button onclick="addGlobalItem()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Tambah ke List Global</button>
-                </div>
-
-                <div class="mt-6">
-                    <h4 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Daftar Link Saat Ini</h4>
-                    <div id="admin-item-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-        </section>
-
     </main>
 
     <!-- FOOTER -->
@@ -138,7 +85,7 @@
         &copy; 2026 Delta Lite. Global Synchronized System.
     </footer>
 
-    <!-- LOGIKA JAVASCRIPT GLOBAL -->
+    <!-- LOGIKA JAVASCRIPT -->
     <script>
         let globalData = { auth_key: "delta2026", downloads: { "64bit": [], "32bit": [] } };
 
@@ -156,14 +103,6 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             await fetchAppData();
-
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('sandirobux')) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('admin-section').classList.remove('hidden');
-                renderAdminList();
-                return;
-            }
 
             const sessionDevice = sessionStorage.getItem('delta_session_active');
             if (sessionDevice === 'true') {
@@ -194,7 +133,7 @@
         function handleLogout() {
             sessionStorage.removeItem('delta_session_active');
             document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('auth-section').classList.add('hidden'); // Reset tampilan
+            document.getElementById('auth-section').classList.remove('hidden');
             window.location.reload();
         }
 
@@ -247,73 +186,6 @@
                         <a href="${item.link}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Download</a>
                     </div>
                 `).join('');
-        }
-
-        function closeAdmin() {
-            window.location.href = window.location.pathname;
-        }
-
-        // Fungsi unduh data baru sebagai file data.json untuk di-upload ulang ke GitHub
-        function downloadDataJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalData, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "data.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function updateGlobalKey() {
-            const newKey = document.getElementById('admin-new-key').value.trim();
-            if (!newKey) return alert('Key tidak boleh kosong!');
-            globalData.auth_key = newKey;
-            downloadDataJSON();
-            alert('Auth key diubah! File "data.json" baru telah terunduh otomatis. Silakan replace/upload file data.json tersebut ke GitHub.');
-            document.getElementById('admin-new-key').value = '';
-        }
-
-        function addGlobalItem() {
-            const title = document.getElementById('admin-title').value.trim();
-            const link = document.getElementById('admin-link').value.trim();
-            const arch = document.getElementById('admin-arch').value;
-
-            if (!title || !link) return alert('Judul dan Link wajib diisi!');
-
-            globalData.downloads[arch].push({ title, link });
-            downloadDataJSON();
-            document.getElementById('admin-title').value = '';
-            document.getElementById('admin-link').value = '';
-            renderAdminList();
-            alert('Link ditambahkan! File "data.json" baru telah terunduh otomatis. Silakan replace/upload file data.json tersebut ke GitHub.');
-        }
-
-        function deleteGlobalItem(arch, index) {
-            globalData.downloads[arch].splice(index, 1);
-            downloadDataJSON();
-            renderAdminList();
-            alert('Item dihapus! File "data.json" baru telah terunduh otomatis. Silakan replace/upload file data.json tersebut ke GitHub.');
-        }
-
-        function renderAdminList() {
-            const listEl = document.getElementById('admin-item-list');
-            let html = '';
-            ['64bit', '32bit'].forEach(arch => {
-                globalData.downloads[arch].forEach((item, index) => {
-                    html += `
-                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
-                            <div>
-                                <span class="font-semibold text-slate-200">${item.title}</span>
-                                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded ml-2 text-slate-400">${arch.toUpperCase()}</span>
-                            </div>
-                            <button onclick="deleteGlobalItem('${arch}', ${index})" class="text-red-400 hover:text-red-300 px-2 py-1 rounded cursor-pointer">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                });
-            });
-            listEl.innerHTML = html || '<p class="text-xs text-slate-500 text-center py-2">Belum ada link diatur.</p>';
         }
     </script>
 </body>
