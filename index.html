@@ -72,14 +72,10 @@
             </div>
 
             <!-- Konten List 64-Bit -->
-            <div id="content-64bit" class="space-y-3">
-                <!-- Data akan dirender otomatis via JS -->
-            </div>
+            <div id="content-64bit" class="space-y-3"></div>
 
             <!-- Konten List 32-Bit -->
-            <div id="content-32bit" class="space-y-3 hidden">
-                <!-- Data akan dirender otomatis via JS -->
-            </div>
+            <div id="content-32bit" class="space-y-3 hidden"></div>
         </section>
 
         <!-- 3. SECTION: ADMIN PANEL -->
@@ -90,8 +86,8 @@
                         <i class="fa-solid fa-sliders text-xl"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-lg">Admin Panel</h2>
-                        <p class="text-xs text-slate-400">Atur Auth Key dan Link Download</p>
+                        <h2 class="font-bold text-lg">Admin Panel (Global Mode)</h2>
+                        <p class="text-xs text-slate-400">Kelola link download untuk semua perangkat</p>
                     </div>
                 </div>
                 <button onclick="closeAdmin()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg transition cursor-pointer">
@@ -99,12 +95,17 @@
                 </button>
             </div>
 
+            <!-- Info Panduan Admin -->
+            <div class="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl text-xs text-blue-300">
+                <i class="fa-solid fa-circle-info mr-1"></i> Perubahan data akan langsung tersimpan secara global dan otomatis terupdate di semua perangkat pengguna.
+            </div>
+
             <!-- Pengaturan Auth Key -->
             <div class="space-y-3">
                 <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Ubah Auth Key Aktif</label>
                 <div class="flex gap-2">
                     <input type="text" id="admin-new-key" placeholder="Key baru..." class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    <button onclick="saveNewKey()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Simpan Key</button>
+                    <button onclick="updateGlobalKey()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Simpan Key</button>
                 </div>
             </div>
 
@@ -120,14 +121,12 @@
                         <option value="64bit">Folder 64-Bit</option>
                         <option value="32bit">Folder 32-Bit</option>
                     </select>
-                    <button onclick="addDownloadItem()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Tambah ke List</button>
+                    <button onclick="addGlobalItem()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Tambah ke List Global</button>
                 </div>
 
                 <div class="mt-6">
                     <h4 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">Daftar Link Saat Ini</h4>
-                    <div id="admin-item-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <!-- Render item admin -->
-                    </div>
+                    <div id="admin-item-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
             </div>
         </section>
@@ -136,31 +135,28 @@
 
     <!-- FOOTER -->
     <footer class="text-center py-6 text-xs text-slate-600">
-        &copy; 2026 Delta Lite. Protected Device Session System.
+        &copy; 2026 Delta Lite. Global Synchronized System.
     </footer>
 
-    <!-- LOGIKA JAVASCRIPT -->
+    <!-- LOGIKA JAVASCRIPT GLOBAL -->
     <script>
-        const DEFAULT_KEY = "delta2026";
-        const DEFAULT_DATA = {
-            "64bit": [
-                { title: "Delta Lite v2.5 (64-bit Optimal)", link: "#" },
-                { title: "Delta Lite v2.4 (Stable 64-bit)", link: "#" }
-            ],
-            "32bit": [
-                { title: "Delta Lite v2.5 (32-bit Legacy)", link: "#" }
-            ]
-        };
+        let globalData = { auth_key: "delta2026", downloads: { "64bit": [], "32bit": [] } };
 
-        // Inisialisasi Storage
-        if (!localStorage.getItem('delta_auth_key')) {
-            localStorage.setItem('delta_auth_key', DEFAULT_KEY);
-        }
-        if (!localStorage.getItem('delta_downloads')) {
-            localStorage.setItem('delta_downloads', JSON.stringify(DEFAULT_DATA));
+        // Ambil data dari file data.json saat website dibuka
+        async function fetchAppData() {
+            try {
+                const response = await fetch('data.json?t=' + new Date().getTime()); // Mencegah cache browser
+                if (response.ok) {
+                    globalData = await response.json();
+                }
+            } catch (error) {
+                console.error("Gagal memuat data:", error);
+            }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchAppData();
+
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('sandirobux')) {
                 document.getElementById('auth-section').classList.add('hidden');
@@ -178,9 +174,8 @@
         function handleAuth(e) {
             e.preventDefault();
             const inputKey = document.getElementById('auth-key-input').value.trim();
-            const savedKey = localStorage.getItem('delta_auth_key');
 
-            if (inputKey === savedKey) {
+            if (inputKey === globalData.auth_key) {
                 sessionStorage.setItem('delta_session_active', 'true');
                 showDashboard();
             } else {
@@ -199,8 +194,8 @@
         function handleLogout() {
             sessionStorage.removeItem('delta_session_active');
             document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('auth-key-input').value = '';
+            document.getElementById('auth-section').classList.add('hidden'); // Reset tampilan
+            window.location.reload();
         }
 
         function switchTab(type) {
@@ -223,11 +218,9 @@
         }
 
         function renderDownloadLists() {
-            const data = JSON.parse(localStorage.getItem('delta_downloads'));
-            
             const cont64 = document.getElementById('content-64bit');
-            cont64.innerHTML = data['64bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 64-Bit.</p>' : 
-                data['64bit'].map(item => `
+            cont64.innerHTML = globalData.downloads['64bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 64-Bit.</p>' : 
+                globalData.downloads['64bit'].map(item => `
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-slate-700 transition">
                         <div class="flex items-center gap-3">
                             <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-file-arrow-down"></i></div>
@@ -241,8 +234,8 @@
                 `).join('');
 
             const cont32 = document.getElementById('content-32bit');
-            cont32.innerHTML = data['32bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 32-Bit.</p>' : 
-                data['32bit'].map(item => `
+            cont32.innerHTML = globalData.downloads['32bit'].length === 0 ? '<p class="text-xs text-slate-500 text-center py-4">Belum ada file di folder 32-Bit.</p>' : 
+                globalData.downloads['32bit'].map(item => `
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between hover:border-slate-700 transition">
                         <div class="flex items-center gap-3">
                             <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-lg"><i class="fa-solid fa-file-arrow-down"></i></div>
@@ -260,52 +253,60 @@
             window.location.href = window.location.pathname;
         }
 
-        function saveNewKey() {
+        // Fungsi unduh data baru sebagai file data.json untuk di-upload ulang ke GitHub
+        function downloadDataJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "data.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function updateGlobalKey() {
             const newKey = document.getElementById('admin-new-key').value.trim();
             if (!newKey) return alert('Key tidak boleh kosong!');
-            localStorage.setItem('delta_auth_key', newKey);
-            alert('Auth Key berhasil diperbarui!');
+            globalData.auth_key = newKey;
+            downloadDataJSON();
+            alert('Auth key diubah! File "data.json" baru telah terunduh otomatis. Silakan replace/upload file data.json tersebut ke GitHub.');
             document.getElementById('admin-new-key').value = '';
         }
 
-        function addDownloadItem() {
+        function addGlobalItem() {
             const title = document.getElementById('admin-title').value.trim();
             const link = document.getElementById('admin-link').value.trim();
             const arch = document.getElementById('admin-arch').value;
 
             if (!title || !link) return alert('Judul dan Link wajib diisi!');
 
-            const data = JSON.parse(localStorage.getItem('delta_downloads'));
-            data[arch].push({ title, link });
-            localStorage.setItem('delta_downloads', JSON.stringify(data));
-
+            globalData.downloads[arch].push({ title, link });
+            downloadDataJSON();
             document.getElementById('admin-title').value = '';
             document.getElementById('admin-link').value = '';
             renderAdminList();
-            alert('Link berhasil ditambahkan!');
+            alert('Link ditambahkan! File "data.json" baru telah terunduh otomatis. Silakan replace/upload file data.json tersebut ke GitHub.');
         }
 
-        function deleteItem(arch, index) {
-            const data = JSON.parse(localStorage.getItem('delta_downloads'));
-            data[arch].splice(index, 1);
-            localStorage.setItem('delta_downloads', JSON.stringify(data));
+        function deleteGlobalItem(arch, index) {
+            globalData.downloads[arch].splice(index, 1);
+            downloadDataJSON();
             renderAdminList();
+            alert('Item dihapus! File "data.json" baru telah terunduh otomatis. Silakan replace/upload file data.json tersebut ke GitHub.');
         }
 
         function renderAdminList() {
-            const data = JSON.parse(localStorage.getItem('delta_downloads'));
             const listEl = document.getElementById('admin-item-list');
-            
             let html = '';
             ['64bit', '32bit'].forEach(arch => {
-                data[arch].forEach((item, index) => {
+                globalData.downloads[arch].forEach((item, index) => {
                     html += `
                         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs">
                             <div>
                                 <span class="font-semibold text-slate-200">${item.title}</span>
                                 <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded ml-2 text-slate-400">${arch.toUpperCase()}</span>
                             </div>
-                            <button onclick="deleteItem('${arch}', ${index})" class="text-red-400 hover:text-red-300 px-2 py-1 rounded cursor-pointer">
+                            <button onclick="deleteGlobalItem('${arch}', ${index})" class="text-red-400 hover:text-red-300 px-2 py-1 rounded cursor-pointer">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
